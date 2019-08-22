@@ -35,13 +35,15 @@ public class BackupOnEvent extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         getConfig().options().header("You can enable/disable the events that will trigger a backup to happen\n" +
                 "Messages and announcements can be hidden\n" +
-                "onJoin and onQuit will hide the 'x has joined the server' messages");
+                "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
+                "Setting maxInMegaBytes to 0 will provide unlimited space");
         getConfig().addDefault("Player.onJoin", true);
         getConfig().addDefault("Player.onQuit", false);
         getConfig().addDefault("HideMessage.onJoin", false);
         getConfig().addDefault("HideMessage.onQuit", false);
         getConfig().addDefault("HideMessage.privatelyOnBackup", false);
         getConfig().addDefault("HideMessage.publiclyOnBackup", false);
+        getConfig().addDefault("BackupStorage.maxInMegaBytes", 1024);
         saveConfig();
 
         // Register event triggers

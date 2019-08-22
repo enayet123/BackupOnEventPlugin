@@ -3,8 +3,7 @@ import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,6 +15,7 @@ import java.util.*;
  */
 public class BackupRunnable implements Runnable {
 
+    private BackupOnEvent plugin;
     private String prefix;
     private String playerName;
     private String worldName;
@@ -24,14 +24,15 @@ public class BackupRunnable implements Runnable {
     /**
      * Initializes the runnable with the information required to
      * run a successful backup
-     * @param prefix Prefix of a message/announcement
+     * @param plugin Plugin to get prefix of a message/announcement and disk allocation
      * @param playerName Name of the player that triggered event
      * @param worldName Name of the world (From server.properties)
      * @param broadcast States if an announcement is to be made
      *                  on completion
      */
-    public BackupRunnable(String prefix, String playerName, String worldName, boolean broadcast) {
-        this.prefix = prefix;
+    public BackupRunnable(BackupOnEvent plugin, String playerName, String worldName, boolean broadcast) {
+        this.prefix = plugin.prefix;
+        this.plugin = plugin;
         this.playerName = playerName;
         this.worldName = worldName;
         this.broadcast = broadcast;
@@ -45,17 +46,17 @@ public class BackupRunnable implements Runnable {
 
         // Setup Date and define format
         Date date = new Date();
-        DateFormat format = new SimpleDateFormat("yyyy-mm-dd_hh'h'mm'm'-'" + playerName + "-" + worldName + "'");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + playerName + "-" + worldName + "'");
 
         // Attempt to Zip available world folders
         try {
 
             ZipUtil.ZipDirs(
-                    "world_backups", // Destination
-                    ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
-                            format.format(date):format.format(date).substring(0, 254)) + ".zip",
-                    true, f -> true, // Delete existing?
-                    getAvailableDirs() // Source folders
+                worldName + "_backups", // Destination
+                ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
+                        format.format(date):format.format(date).substring(0, 254)) + ".zip",
+                true, f -> true, // Delete existing?
+                getAvailableDirs() // Source folders
             );
 
             // Announce or log backup success message
@@ -63,6 +64,12 @@ public class BackupRunnable implements Runnable {
                 Bukkit.broadcastMessage(prefix + ChatColor.GREEN + "Created backup " + format.format(date) + ".zip");
             else
                 Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Created backup " + format.format(date) + ".zip");
+
+            // Verify storage constraints are met
+            if (plugin.getConfig().getInt("BackupStorage.MaxInMegaBytes") != 0)
+                new FolderVisitor(prefix,worldName + "_backups").meetStorageRestriction(
+                        plugin.getConfig().getInt("BackupStorage.MaxInMegaBytes")
+                );
 
         } catch (IOException e) {
 

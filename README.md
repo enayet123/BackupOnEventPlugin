@@ -13,6 +13,7 @@ When backing up, the plugin will look for the default `world`, the `nether` and 
 # You can enable/disable the events that will trigger a backup to happen
 # Messages and announcements can be hidden
 # onJoin and onQuit will hide the 'x has joined the server' messages
+# Setting maxInMegaBytes to 0 will provide unlimited space
 Player:
   onJoin: true
   onQuit: false
@@ -21,4 +22,6 @@ HideMessage:
   onQuit: false
   privatelyOnBackup: false
   publiclyOnBackup: false
+BackupStorage:
+  maxInMegaBytes: 1024
 ```

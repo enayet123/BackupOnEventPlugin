@@ -99,7 +99,7 @@ public class BackupEvents implements Listener {
         String worldName = Bukkit.getWorlds().get(0).getName();
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
                 new BackupRunnable(
-                        prefix,
+                        plugin,
                         playerName,
                         worldName,
                         plugin.getConfig().get("HideMessage.publiclyOnBackup").equals(false)
