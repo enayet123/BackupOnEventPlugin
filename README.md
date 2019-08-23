@@ -4,6 +4,8 @@ When backing up, the plugin will look for the default `world`, the `nether` and 
 
 `config.yml` can be used to define which events trigger a backup and to control backup announcement or messages.
 
+Backups can have a minimum time interval set, using the `minimumIntervalInMinutes` field, which prevents backups being triggered multiple times by different users within the defined time period. The `maxInMegaBytes` field defines the maximum amount of storage the plugin can use for backups. If this is exceeded the plugin will delete the oldest backup.
+
 **Events that trigger a backup**:
   - Player join event
   - Player quit event
@@ -14,14 +16,15 @@ When backing up, the plugin will look for the default `world`, the `nether` and 
 # Messages and announcements can be hidden
 # onJoin and onQuit will hide the 'x has joined the server' messages
 # Setting maxInMegaBytes to 0 will provide unlimited space
+# Setting minimumIntervalInMinutes to 0 will allow back to back backups
 Player:
   onJoin: true
   onQuit: false
 HideMessage:
   onJoin: false
   onQuit: false
-  privatelyOnBackup: false
-  publiclyOnBackup: false
+  backupAnnouncement: false
 BackupStorage:
   maxInMegaBytes: 1024
+  minimumIntervalInMinutes: 1
 ```

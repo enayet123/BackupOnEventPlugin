@@ -5,7 +5,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
 import java.io.File;
+import java.time.Instant;
 import java.util.logging.Logger;
 
 /**
@@ -15,9 +17,11 @@ import java.util.logging.Logger;
  */
 public class BackupEvents implements Listener {
 
-    BackupOnEvent plugin;
-    String prefix;
-    Logger logger;
+    private BackupOnEvent plugin;
+    private String prefix;
+    private Logger logger;
+    private String worldName;
+    private Instant lastBackup;
 
     /**
      * Initializes event listener class
@@ -27,7 +31,9 @@ public class BackupEvents implements Listener {
     public BackupEvents(BackupOnEvent plugin, Logger logger) {
         this.plugin = plugin;
         this.logger = logger;
-        prefix = plugin.prefix;
+        this.prefix = plugin.prefix;
+        this.worldName = Bukkit.getWorlds().get(0).getName();
+        this.lastBackup = Instant.EPOCH;
     }
 
     /**
@@ -43,17 +49,7 @@ public class BackupEvents implements Listener {
         // If event is disabled, return immediately
         if (plugin.getConfig().get("Player.onJoin").equals(false)) return;
 
-        // Notify player of backup if required
-        Player p = e.getPlayer();
-        if (plugin.getConfig().get("HideMessage.privatelyOnBackup").equals(false))
-            p.sendMessage(
-                    String.format("%sWelcome %s%s! Preparing a backup...",
-                            ChatColor.GREEN,
-                            ChatColor.GOLD + p.getDisplayName(),
-                            ChatColor.GREEN
-                    )
-            );
-
+        // Run backup
         this.backup(e.getPlayer());
 
     }
@@ -76,35 +72,51 @@ public class BackupEvents implements Listener {
     }
 
     private void createFolder() {
-        File f = new File("world_backups");
-        if (!f.exists()) {
+
+        // Create backup folder
+        File f = new File(worldName + "_backups");
+        if (!f.exists())
             if (f.mkdir()) {
-                logger.info(prefix + "Created directory 'world_backups'");
+                logger.info(prefix + "Created directory '" + worldName + "_backups'");
             } else {
-                logger.info(prefix + "Failed to create directory 'world_backups', shutting down plugin!");
+                logger.info(prefix + "Failed to create directory '" + worldName + "_backups', shutting down plugin!");
                 plugin.getServer().getPluginManager().disablePlugin(plugin);
             }
-        }
+
     }
 
     private void backup(Player p) {
 
+        // If minimum interval requirement not met
+        if (!minimumIntervalPassed()) return;
+
         // Notify all players on server if required
-        if (plugin.getConfig().get("HideMessage.publiclyOnBackup").equals(false))
+        if (plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false))
             Bukkit.broadcastMessage(prefix + ChatColor.YELLOW + "Attempting to backup...");
 
         // Backup
         this.createFolder();
         String playerName = p.getDisplayName();
-        String worldName = Bukkit.getWorlds().get(0).getName();
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
                 new BackupRunnable(
                         plugin,
                         playerName,
                         worldName,
-                        plugin.getConfig().get("HideMessage.publiclyOnBackup").equals(false)
+                        plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false)
                 )
         );
+        lastBackup = Instant.now();
+
+    }
+
+    private boolean minimumIntervalPassed() {
+
+        // If no minimum set, return true
+        int min;
+        if ((min = (plugin.getConfig().getInt("BackupStorage.minimumIntervalInMinutes") * 60)) == 0) return true;
+
+        // Check if minimum interval has passed
+        return ((Instant.now().getEpochSecond() - min) > lastBackup.getEpochSecond());
 
     }
 

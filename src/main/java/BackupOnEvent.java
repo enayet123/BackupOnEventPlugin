@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class BackupOnEvent extends JavaPlugin {
 
-    public String prefix;
+    protected String prefix;
 
     /**
      * Defines a message prefix, prepares necessary
@@ -36,14 +36,15 @@ public class BackupOnEvent extends JavaPlugin {
         getConfig().options().header("You can enable/disable the events that will trigger a backup to happen\n" +
                 "Messages and announcements can be hidden\n" +
                 "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
-                "Setting maxInMegaBytes to 0 will provide unlimited space");
+                "Setting maxInMegaBytes to 0 will provide unlimited space\n" +
+                "Setting minimumIntervalInMinutes to 0 will allow back to back backups");
         getConfig().addDefault("Player.onJoin", true);
         getConfig().addDefault("Player.onQuit", false);
         getConfig().addDefault("HideMessage.onJoin", false);
         getConfig().addDefault("HideMessage.onQuit", false);
-        getConfig().addDefault("HideMessage.privatelyOnBackup", false);
-        getConfig().addDefault("HideMessage.publiclyOnBackup", false);
+        getConfig().addDefault("HideMessage.backupAnnouncement", false);
         getConfig().addDefault("BackupStorage.maxInMegaBytes", 1024);
+        getConfig().addDefault("BackupStorage.minimumIntervalInMinutes", 1);
         saveConfig();
 
         // Register event triggers
@@ -69,5 +70,7 @@ public class BackupOnEvent extends JavaPlugin {
         }
 
     }
+
+
 
 }
