@@ -43,7 +43,7 @@ public class FolderVisitor implements FileVisitor<Path> {
 
         // Check if limit exceeded
         boolean exceeded = bytes > maxBytes;
-        this.logStatus(exceeded, max);
+        this.logStatus(exceeded, max, bytes);
 
         // Start removing old backups
         while (exceeded && files.size() > 0) {
@@ -77,9 +77,11 @@ public class FolderVisitor implements FileVisitor<Path> {
         }
     }
 
-    private void logStatus(boolean exceeded, long max) {
+    private void logStatus(boolean exceeded, long max, long current) {
         if (exceeded)
-            Bukkit.getLogger().info(prefix + ChatColor.RED + "Max of " + max + "MB exceeded! Deleting files...");
+            Bukkit.getLogger().info(prefix + ChatColor.RED + "Max of " + max + " MB exceeded! Deleting files...");
+        else
+            Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Currently using: " + current/1000000 + " MB");
     }
 
     @Override

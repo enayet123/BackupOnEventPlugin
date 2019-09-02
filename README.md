@@ -9,17 +9,20 @@ Backups can have a minimum time interval set, using the `minimumIntervalInMinute
 **Events that trigger a backup**:
   - Player join event
   - Player quit event
+  - Player with correct permission executing `\backup` command
 
 ## Default config.yml
 ```yaml
 # You can enable/disable the events that will trigger a backup to happen
 # Messages and announcements can be hidden
 # onJoin and onQuit will hide the 'x has joined the server' messages
+# mustBeOpToUseCommand restricts the /backup command to ops only
 # Setting maxInMegaBytes to 0 will provide unlimited space
 # Setting minimumIntervalInMinutes to 0 will allow back to back backups
 Player:
   onJoin: true
   onQuit: false
+  mustBeOpToUseCommand: true
 HideMessage:
   onJoin: false
   onQuit: false

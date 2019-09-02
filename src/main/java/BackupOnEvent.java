@@ -30,16 +30,21 @@ public class BackupOnEvent extends JavaPlugin {
         // State plugin is active
         Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Activated");
 
+        // Setup commands
+        this.setupCommands();
+
         // Setup config file
         this.createFolder();
         getConfig().options().copyDefaults(true);
         getConfig().options().header("You can enable/disable the events that will trigger a backup to happen\n" +
                 "Messages and announcements can be hidden\n" +
                 "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
+                "mustBeOpToUseCommand restricts the /backup command to ops only\n" +
                 "Setting maxInMegaBytes to 0 will provide unlimited space\n" +
                 "Setting minimumIntervalInMinutes to 0 will allow back to back backups");
         getConfig().addDefault("Player.onJoin", true);
         getConfig().addDefault("Player.onQuit", false);
+        getConfig().addDefault("Player.mustBeOpToUseCommand", true);
         getConfig().addDefault("HideMessage.onJoin", false);
         getConfig().addDefault("HideMessage.onQuit", false);
         getConfig().addDefault("HideMessage.backupAnnouncement", false);
@@ -71,6 +76,8 @@ public class BackupOnEvent extends JavaPlugin {
 
     }
 
-
+    private void setupCommands() {
+        getCommand("backup").setExecutor(new BackupCommands(this));
+    }
 
 }

@@ -66,9 +66,9 @@ public class BackupRunnable implements Runnable {
                 Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Created backup " + format.format(date) + ".zip");
 
             // Verify storage constraints are met
-            if (plugin.getConfig().getInt("BackupStorage.MaxInMegaBytes") != 0)
+            if (plugin.getConfig().getInt("BackupStorage.maxInMegaBytes") != 0)
                 new FolderVisitor(prefix,worldName + "_backups").meetStorageRestriction(
-                        plugin.getConfig().getInt("BackupStorage.MaxInMegaBytes")
+                        plugin.getConfig().getInt("BackupStorage.maxInMegaBytes")
                 );
 
         } catch (IOException e) {

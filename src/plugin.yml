@@ -4,3 +4,7 @@ author: Enayet Hussain (enayet123)
 api-version: 1.14
 main: BackupOnEvent
 description: Backs up all worlds when a player joins
+commands:
+  backup:
+    description: Force backup to happen immediately
+    usage: /backup
