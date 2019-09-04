@@ -22,6 +22,7 @@ public class BackupEvents implements Listener {
     private Logger logger;
     private String worldName;
     private Instant lastBackup;
+    private boolean updateQueued = false;
 
     /**
      * Initializes event listener class
@@ -42,6 +43,8 @@ public class BackupEvents implements Listener {
      */
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, new UpdateRunnable(plugin, e.getPlayer(), this));
 
         // Hide Join message if required
         if (plugin.getConfig().get("HideMessage.onJoin").equals(true)) e.setJoinMessage("");
@@ -71,6 +74,17 @@ public class BackupEvents implements Listener {
 
     }
 
+    /**
+     * Returns if an update is queued
+     * @return is update queued
+     */
+    public boolean getUpdateQueued() { return updateQueued; }
+
+    /**
+     * Sets updateQueued to true, this can only be set to false through a reload/restart
+     */
+    public void setUpdateQueued() { updateQueued = true; }
+
     private void createFolder() {
 
         // Create backup folder
@@ -95,16 +109,7 @@ public class BackupEvents implements Listener {
             Bukkit.broadcastMessage(prefix + ChatColor.YELLOW + "Attempting to backup...");
 
         // Backup
-        this.createFolder();
-        String playerName = p.getDisplayName();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                new BackupRunnable(
-                        plugin,
-                        playerName,
-                        worldName,
-                        plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false)
-                )
-        );
+        BackupRunnable.run(plugin, p.getDisplayName(), worldName);
         lastBackup = Instant.now();
 
     }

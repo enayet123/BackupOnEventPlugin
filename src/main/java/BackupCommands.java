@@ -54,25 +54,12 @@ public class BackupCommands implements CommandExecutor {
             }
 
             // Backup with player as reason for trigger
-            runAsyncBackup(p.getName());
+            BackupRunnable.run(plugin, p.getName(), Bukkit.getWorlds().get(0).getName());
 
         } else if (commandSender instanceof ConsoleCommandSender) {
             // Backup with server console as reason for trigger
-            runAsyncBackup("CONSOLE");
+            BackupRunnable.run(plugin, "CONSOLE", Bukkit.getWorlds().get(0).getName());
         }
-
-    }
-
-    private void runAsyncBackup(String name) {
-
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                new BackupRunnable(
-                        plugin,
-                        name,
-                        Bukkit.getWorlds().get(0).getName(),
-                        plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false)
-                )
-        );
 
     }
 

@@ -1,5 +1,5 @@
 name: BackupOnEvent
-version: 1.1
+version: 1.4
 author: Enayet Hussain (enayet123)
 api-version: 1.14
 main: BackupOnEvent

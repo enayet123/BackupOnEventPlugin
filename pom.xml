@@ -28,8 +28,8 @@
         </plugins>
     </build>
 
-    <!-- Paper Repo -->
     <repositories>
+        <!-- Paper Repo -->
         <repository>
             <id>destroystokyo-repo</id>
             <url>https://repo.destroystokyo.com/repository/maven-public//</url>

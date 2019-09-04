@@ -17,7 +17,7 @@ public class BackupRunnable implements Runnable {
 
     private BackupOnEvent plugin;
     private String prefix;
-    private String playerName;
+    private String triggerName;
     private String worldName;
     private boolean broadcast;
 
@@ -25,15 +25,15 @@ public class BackupRunnable implements Runnable {
      * Initializes the runnable with the information required to
      * run a successful backup
      * @param plugin Plugin to get prefix of a message/announcement and disk allocation
-     * @param playerName Name of the player that triggered event
+     * @param triggerName Name of the entity that triggered event
      * @param worldName Name of the world (From server.properties)
      * @param broadcast States if an announcement is to be made
      *                  on completion
      */
-    public BackupRunnable(BackupOnEvent plugin, String playerName, String worldName, boolean broadcast) {
+    public BackupRunnable(BackupOnEvent plugin, String triggerName, String worldName, boolean broadcast) {
         this.prefix = plugin.prefix;
         this.plugin = plugin;
-        this.playerName = playerName;
+        this.triggerName = triggerName;
         this.worldName = worldName;
         this.broadcast = broadcast;
     }
@@ -44,9 +44,12 @@ public class BackupRunnable implements Runnable {
      */
     public void run() {
 
+        // Ensure folder is available
+        this.createFolder();
+
         // Setup Date and define format
         Date date = new Date();
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + playerName + "-" + worldName + "'");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + triggerName + "-" + worldName + "'");
 
         // Attempt to Zip available world folders
         try {
@@ -84,6 +87,20 @@ public class BackupRunnable implements Runnable {
 
     }
 
+    /**
+     * Run asynchronous backup
+     * @param plugin Plugin to get prefix of a message/announcement and disk allocation
+     * @param name Name of the entity that triggered event
+     * @param world Name of the world (From server.properties)
+     */
+    public static void run(BackupOnEvent plugin, String name, String world) {
+
+        // Run asynchronous backup
+        boolean announce = plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, new BackupRunnable(plugin, name, world, announce));
+
+    }
+
     private String[] getAvailableDirs() {
 
         // Map of possible folders
@@ -109,6 +126,21 @@ public class BackupRunnable implements Runnable {
 
         // Return available folders
         return sources.keySet().stream().filter(x -> new File(x).exists()).map(x -> Paths.get(x)).toArray(Path[]::new);
+
+    }
+
+    private void createFolder() {
+
+        // Create backup folder
+        File f = new File(worldName + "_backups");
+        if (!f.exists())
+            if (f.mkdir()) {
+                Bukkit.getLogger().info(prefix + "Created directory '" + worldName + "_backups'");
+            } else {
+                Bukkit.getLogger().info(prefix + "Failed to create directory '" + worldName +
+                        "_backups', shutting down plugin!");
+                plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }
 
     }
 

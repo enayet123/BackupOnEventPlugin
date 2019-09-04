@@ -2,6 +2,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 /**
  * Main class called by Bukkit/Spigot/Paper to initialize
  * plugin
@@ -34,23 +36,7 @@ public class BackupOnEvent extends JavaPlugin {
         this.setupCommands();
 
         // Setup config file
-        this.createFolder();
-        getConfig().options().copyDefaults(true);
-        getConfig().options().header("You can enable/disable the events that will trigger a backup to happen\n" +
-                "Messages and announcements can be hidden\n" +
-                "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
-                "mustBeOpToUseCommand restricts the /backup command to ops only\n" +
-                "Setting maxInMegaBytes to 0 will provide unlimited space\n" +
-                "Setting minimumIntervalInMinutes to 0 will allow back to back backups");
-        getConfig().addDefault("Player.onJoin", true);
-        getConfig().addDefault("Player.onQuit", false);
-        getConfig().addDefault("Player.mustBeOpToUseCommand", true);
-        getConfig().addDefault("HideMessage.onJoin", false);
-        getConfig().addDefault("HideMessage.onQuit", false);
-        getConfig().addDefault("HideMessage.backupAnnouncement", false);
-        getConfig().addDefault("BackupStorage.maxInMegaBytes", 1024);
-        getConfig().addDefault("BackupStorage.minimumIntervalInMinutes", 1);
-        saveConfig();
+        this.setupConfigFile();
 
         // Register event triggers
         this.getServer().getPluginManager().registerEvents(new BackupEvents(this, Bukkit.getLogger()), this);
@@ -63,6 +49,36 @@ public class BackupOnEvent extends JavaPlugin {
     @Override
     public void onDisable() {
         Bukkit.getLogger().info(prefix + ChatColor.RED + "Deactivated");
+    }
+
+    /**
+     * Returns the file which contains the plugin
+     * @return File containing plugin
+     */
+    public File getPluginFile() { return this.getFile(); }
+
+    private void setupConfigFile() {
+
+        this.createFolder();
+        getConfig().options().copyDefaults(true);
+        getConfig().options().header("You can enable/disable the events that will trigger a backup to happen\n" +
+                "Messages and announcements can be hidden\n" +
+                "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
+                "mustBeOpToUseCommand restricts the /backup command to ops only\n" +
+                "Setting maxInMegaBytes to 0 will provide unlimited space\n" +
+                "Setting minimumIntervalInMinutes to 0 will allow back to back backups\n" +
+                "AutoUpdate will download the latest version from bukkit.org when an Op joins the server");
+        getConfig().addDefault("Player.onJoin", true);
+        getConfig().addDefault("Player.onQuit", false);
+        getConfig().addDefault("Player.mustBeOpToUseCommand", true);
+        getConfig().addDefault("HideMessage.onJoin", false);
+        getConfig().addDefault("HideMessage.onQuit", false);
+        getConfig().addDefault("HideMessage.backupAnnouncement", false);
+        getConfig().addDefault("BackupStorage.maxInMegaBytes", 1024);
+        getConfig().addDefault("BackupStorage.minimumIntervalInMinutes", 1);
+        getConfig().addDefault("AutoUpdate.allowed", true);
+        saveConfig();
+
     }
 
     private void createFolder() {
