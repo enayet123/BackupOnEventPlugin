@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -633,7 +634,20 @@ public class Updater {
      * @return true if Updater should consider the remote version an update, false if not.
      */
     public boolean shouldUpdate(String localVersion, String remoteVersion) {
-        return !localVersion.equalsIgnoreCase(remoteVersion);
+        Version local = new Version(getVersion(localVersion));
+        Version remote = new Version(getVersion(remoteVersion));
+
+        return (local.compareTo(remote) == -1);
+    }
+
+    /**
+     * Retrieves version from the end of a string
+     * @param name Name of plugin
+     * @return Version of plugin
+     */
+    private String getVersion(String name) {
+        String[] split = name.split("v");
+        return split[split.length-1];
     }
 
     /**
@@ -770,4 +784,51 @@ public class Updater {
     private void runCallback() {
         this.callback.onFinish(this);
     }
+}
+
+class Version implements Comparable<Version> {
+
+    private String version;
+
+    public final String get() {
+        return this.version;
+    }
+
+    public Version(String version) {
+        if(version == null)
+            throw new IllegalArgumentException("Version can not be null");
+        if(!version.matches("[0-9]+(\\.[0-9]+)*"))
+            throw new IllegalArgumentException("Invalid version format");
+        this.version = version;
+    }
+
+    @Override public int compareTo(Version that) {
+        if(that == null)
+            return 1;
+        String[] thisParts = this.get().split("\\.");
+        String[] thatParts = that.get().split("\\.");
+        int length = Math.max(thisParts.length, thatParts.length);
+        for(int i = 0; i < length; i++) {
+            int thisPart = i < thisParts.length ?
+                    Integer.parseInt(thisParts[i]) : 0;
+            int thatPart = i < thatParts.length ?
+                    Integer.parseInt(thatParts[i]) : 0;
+            if(thisPart < thatPart)
+                return -1;
+            if(thisPart > thatPart)
+                return 1;
+        }
+        return 0;
+    }
+
+    @Override public boolean equals(Object that) {
+        if(this == that)
+            return true;
+        if(that == null)
+            return false;
+        if(this.getClass() != that.getClass())
+            return false;
+        return this.compareTo((Version) that) == 0;
+    }
+
 }
