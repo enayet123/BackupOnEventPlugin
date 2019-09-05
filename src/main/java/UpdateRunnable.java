@@ -21,7 +21,7 @@ public class UpdateRunnable implements Runnable {
      * @param backupEvents Reference back to calling class used to
      *                     update boolean value (Prevent multi downloads)
      */
-    public UpdateRunnable(BackupOnEvent plugin, Player player, BackupEvents backupEvents) {
+    UpdateRunnable(BackupOnEvent plugin, Player player, BackupEvents backupEvents) {
         this.plugin = plugin;
         this.player = player;
         this.backupEvents = backupEvents;
@@ -36,7 +36,7 @@ public class UpdateRunnable implements Runnable {
     public void run() {
 
         // If not allowed by config or player is not Op, return
-        if (!plugin.getConfig().getBoolean("AutoUpdate.allowed") || !player.isOp()) return;
+        if (!plugin.getConfig().getBoolean("AutoUpdate.enabled") || !player.isOp()) return;
 
         // Is there an update already queued, message and return
         if (backupEvents.getUpdateQueued()) { player.sendMessage(msg); return; }

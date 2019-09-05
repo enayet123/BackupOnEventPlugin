@@ -11,7 +11,7 @@ import java.util.zip.ZipOutputStream;
  * Modifications:
  * - Main class example removed
  */
-public class ZipUtil {
+class ZipUtil {
 
     /**
      * This method is the entry point for creating a zip file.
@@ -25,7 +25,7 @@ public class ZipUtil {
      * @param sourceDirs:     multiple source directories to be zipped.
      * @throws IOException
      */
-    public static void ZipDirs (
+    static void ZipDirs(
             String destinationDir,
             String zipName,
             boolean deleteExisting,

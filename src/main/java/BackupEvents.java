@@ -1,4 +1,3 @@
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -6,9 +5,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.io.File;
 import java.time.Instant;
-import java.util.logging.Logger;
+
+import static org.bukkit.Bukkit.*;
 
 /**
  * Listens for events that can trigger a backup to
@@ -19,22 +18,17 @@ public class BackupEvents implements Listener {
 
     private BackupOnEvent plugin;
     private String prefix;
-    private Logger logger;
-    private String worldName;
-    private Instant lastBackup;
+    private String worldName = getWorlds().get(0).getName();
+    private Instant lastBackup = Instant.EPOCH;
     private boolean updateQueued = false;
 
     /**
      * Initializes event listener class
      * @param plugin Refers back to the main class, BackupOnEvent
-     * @param logger Logger used to output process information
      */
-    public BackupEvents(BackupOnEvent plugin, Logger logger) {
+    BackupEvents(BackupOnEvent plugin) {
         this.plugin = plugin;
-        this.logger = logger;
         this.prefix = plugin.prefix;
-        this.worldName = Bukkit.getWorlds().get(0).getName();
-        this.lastBackup = Instant.EPOCH;
     }
 
     /**
@@ -44,13 +38,13 @@ public class BackupEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new UpdateRunnable(plugin, e.getPlayer(), this));
+        getScheduler().runTaskAsynchronously(plugin, new UpdateRunnable(plugin, e.getPlayer(), this));
 
         // Hide Join message if required
         if (plugin.getConfig().get("HideMessage.onJoin").equals(true)) e.setJoinMessage("");
 
         // If event is disabled, return immediately
-        if (plugin.getConfig().get("Player.onJoin").equals(false)) return;
+        if (plugin.getConfig().get("RunBackupOn.playerJoin").equals(false)) return;
 
         // Run backup
         this.backup(e.getPlayer());
@@ -67,10 +61,13 @@ public class BackupEvents implements Listener {
         // Hide Quit message if required
         if (plugin.getConfig().get("HideMessage.onQuit").equals(true)) e.setQuitMessage("");
 
-        // If event is disabled, return immediately
-        if (plugin.getConfig().get("Player.onQuit").equals(false)) return;
+        // Check if player was last player to leave and this event type is enabled
+        if (getOnlinePlayers().size() == 0 && plugin.getConfig().get("RunBackupOn.lastPlayerQuit").equals(true))
+            this.backup(e.getPlayer());
 
-        this.backup(e.getPlayer());
+        // Else if quit backups are enabled, run backup
+        else if (plugin.getConfig().get("RunBackupOn.playerQuit").equals(true))
+            this.backup(e.getPlayer());
 
     }
 
@@ -78,26 +75,12 @@ public class BackupEvents implements Listener {
      * Returns if an update is queued
      * @return is update queued
      */
-    public boolean getUpdateQueued() { return updateQueued; }
+    boolean getUpdateQueued() { return updateQueued; }
 
     /**
      * Sets updateQueued to true, this can only be set to false through a reload/restart
      */
-    public void setUpdateQueued() { updateQueued = true; }
-
-    private void createFolder() {
-
-        // Create backup folder
-        File f = new File(worldName + "_backups");
-        if (!f.exists())
-            if (f.mkdir()) {
-                logger.info(prefix + "Created directory '" + worldName + "_backups'");
-            } else {
-                logger.info(prefix + "Failed to create directory '" + worldName + "_backups', shutting down plugin!");
-                plugin.getServer().getPluginManager().disablePlugin(plugin);
-            }
-
-    }
+    void setUpdateQueued() { updateQueued = true; }
 
     private void backup(Player p) {
 
@@ -106,7 +89,7 @@ public class BackupEvents implements Listener {
 
         // Notify all players on server if required
         if (plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false))
-            Bukkit.broadcastMessage(prefix + ChatColor.YELLOW + "Attempting to backup...");
+            broadcastMessage(prefix + ChatColor.YELLOW + "Attempting to backup...");
 
         // Backup
         BackupRunnable.run(plugin, p.getDisplayName(), worldName);

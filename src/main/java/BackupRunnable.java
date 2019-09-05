@@ -3,7 +3,6 @@ import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,7 +29,7 @@ public class BackupRunnable implements Runnable {
      * @param broadcast States if an announcement is to be made
      *                  on completion
      */
-    public BackupRunnable(BackupOnEvent plugin, String triggerName, String worldName, boolean broadcast) {
+    private BackupRunnable(BackupOnEvent plugin, String triggerName, String worldName, boolean broadcast) {
         this.prefix = plugin.prefix;
         this.plugin = plugin;
         this.triggerName = triggerName;
@@ -93,7 +92,7 @@ public class BackupRunnable implements Runnable {
      * @param name Name of the entity that triggered event
      * @param world Name of the world (From server.properties)
      */
-    public static void run(BackupOnEvent plugin, String name, String world) {
+    static void run(BackupOnEvent plugin, String name, String world) {
 
         // Run asynchronous backup
         boolean announce = plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false);
@@ -112,20 +111,6 @@ public class BackupRunnable implements Runnable {
 
         // Return available folders
         return sources.keySet().stream().filter(x -> new File(x).exists()).toArray(String[]::new);
-
-    }
-
-    private Path[] getAvailableDirsPath() {
-
-        // Map of possible folders
-        Map<String, Boolean> sources = new HashMap<String, Boolean>() {{
-            put(worldName, false);
-            put(worldName + "_nether", false);
-            put(worldName + "_the_end", false);
-        }};
-
-        // Return available folders
-        return sources.keySet().stream().filter(x -> new File(x).exists()).map(x -> Paths.get(x)).toArray(Path[]::new);
 
     }
 

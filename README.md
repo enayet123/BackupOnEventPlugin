@@ -14,23 +14,28 @@ Backups can have a minimum time interval set, using the `minimumIntervalInMinute
 ## Default config.yml
 ```yaml
 # You can enable/disable the events that will trigger a backup to happen
-# Messages and announcements can backupEvents hidden
+# intervalMinutes runs a backup every time X minutes has passed, 0 means disabled
+# Messages and announcements can be hidden
 # onJoin and onQuit will hide the 'x has joined the server' messages
-# mustBeOpToUseCommand restricts the /backup command to ops only
-# Setting maxInMegaBytes to 0 will provide unlimited space
-# Setting minimumIntervalInMinutes to 0 will allow back to back backups
+# opsOnly restricts the /backup command to ops only
+# Setting maxInMegaBytes to 0 will provide unlimited disk space
+# Setting minimumIntervalInMinutes to 0 will allow concurrent backups
 # AutoUpdate will download the latest version from bukkit.org when an Op joins the server
-Player:
-  onJoin: true
-  onQuit: false
-  mustBeOpToUseCommand: true
+RunBackupOn:
+  playerJoin: true
+  playerQuit: false
+  lastPlayerQuit: false
+  intervalMinutes: 0
 HideMessage:
   onJoin: false
   onQuit: false
   backupAnnouncement: false
+BackupCommand:
+  opsOnly: true
 BackupStorage:
   maxInMegaBytes: 1024
   minimumIntervalInMinutes: 1
 AutoUpdate:
-  allowed: true
+  enabled: true
+
 ```

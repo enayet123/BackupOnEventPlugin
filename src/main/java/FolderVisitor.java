@@ -24,7 +24,7 @@ public class FolderVisitor implements FileVisitor<Path> {
      * @param prefix Used by announcements/logs
      * @param path Folder of interest
      */
-    public FolderVisitor(String prefix, String path) {
+    FolderVisitor(String prefix, String path) {
         this.prefix = prefix;
         this.path = path;
         this.files = new ArrayList<>();
@@ -35,7 +35,7 @@ public class FolderVisitor implements FileVisitor<Path> {
      * that defined in config.yml
      * @param max Maximum storage allowed (In MB)
      */
-    public void meetStorageRestriction(long max) {
+    void meetStorageRestriction(long max) {
 
         // Get size of all backups
         this.walkPathTree();
@@ -65,10 +65,7 @@ public class FolderVisitor implements FileVisitor<Path> {
 
     }
 
-    /**
-     * Walks through a path tree and adds total size of files
-     */
-    public void walkPathTree() {
+    private void walkPathTree() {
         try {
             Files.walkFileTree(Paths.get(this.path), this);
         } catch (IOException e) {
@@ -85,24 +82,24 @@ public class FolderVisitor implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
         return FileVisitResult.CONTINUE;
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         bytes += file.toFile().length(); // Add up file size
         files.add(file); // Add file to list
         return FileVisitResult.CONTINUE;
     }
 
     @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+    public FileVisitResult visitFileFailed(Path file, IOException exc) {
         return FileVisitResult.CONTINUE;
     }
 
     @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+    public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
         if (dir.toString().equals("world_backups")) Collections.sort(files); // Sort array of files
         return FileVisitResult.CONTINUE;
     }
