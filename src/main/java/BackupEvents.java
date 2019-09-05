@@ -62,7 +62,7 @@ public class BackupEvents implements Listener {
         if (plugin.getConfig().get("HideMessage.onQuit").equals(true)) e.setQuitMessage("");
 
         // Check if player was last player to leave and this event type is enabled
-        if (getOnlinePlayers().size() == 0 && plugin.getConfig().get("RunBackupOn.lastPlayerQuit").equals(true))
+        if (getOnlinePlayers().size() == 1 && plugin.getConfig().get("RunBackupOn.lastPlayerQuit").equals(true))
             this.backup(e.getPlayer());
 
         // Else if quit backups are enabled, run backup
