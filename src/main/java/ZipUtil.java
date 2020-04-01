@@ -10,6 +10,7 @@ import java.util.zip.ZipOutputStream;
  *
  * Modifications:
  * - Main class example removed
+ * - Return is no source directories
  */
 class ZipUtil {
 
@@ -31,6 +32,8 @@ class ZipUtil {
             boolean deleteExisting,
             Predicate<File> filePredicate,
             String... sourceDirs) throws IOException {
+
+        if (sourceDirs.length == 0) return; // Do nothing if there are no source directories
 
         File destinationDirFile = new File(destinationDir);
         File zipFile = new File(destinationDir + File.separatorChar + zipName);

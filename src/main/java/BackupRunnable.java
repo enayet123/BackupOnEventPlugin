@@ -50,22 +50,21 @@ public class BackupRunnable implements Runnable {
         Date date = new Date();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + triggerName + "-" + worldName + "'");
 
+        // Define filename
+        String file = ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
+                format.format(date):format.format(date).substring(0, 254)) + ".zip";
+
         // Attempt to Zip available world folders
         try {
-
             ZipUtil.ZipDirs(
                 worldName + "_backups", // Destination
-                ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
-                        format.format(date):format.format(date).substring(0, 254)) + ".zip",
+                    file,
                 true, f -> true, // Delete existing?
                 getAvailableDirs() // Source folders
             );
 
             // Announce or log backup success message
-            if (broadcast)
-                Bukkit.broadcastMessage(prefix + ChatColor.GREEN + "Created backup " + format.format(date) + ".zip");
-            else
-                Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Created backup " + format.format(date) + ".zip");
+            this.log(prefix + ChatColor.GREEN + "Created backup " + file);
 
             // Verify storage constraints are met
             if (plugin.getConfig().getInt("BackupStorage.maxInMegaBytes") != 0)
@@ -76,10 +75,8 @@ public class BackupRunnable implements Runnable {
         } catch (IOException e) {
 
             // Announce or log backup failure message
-            if (broadcast)
-                Bukkit.broadcastMessage(prefix + ChatColor.RED + "Failed to backup world! Please check server logs!");
-            else
-                Bukkit.getLogger().info(prefix + ChatColor.RED + "Failed to backup world! Please check server logs!");
+            this.log(prefix + ChatColor.RED + "Failed to backup world! Please check server logs!");
+
             e.printStackTrace();
 
         }
@@ -103,11 +100,10 @@ public class BackupRunnable implements Runnable {
     private String[] getAvailableDirs() {
 
         // Map of possible folders
-        Map<String, Boolean> sources = new HashMap<String, Boolean>() {{
-            put(worldName, false);
-            put(worldName + "_nether", false);
-            put(worldName + "_the_end", false);
-        }};
+        Map<String, Boolean> sources = new HashMap<String, Boolean>();
+        Set<String> worlds = plugin.getConfig().getConfigurationSection(BackupOnEvent.BACKUP_WORLDS).getKeys(false);
+        for (String world: worlds)
+            sources.put(world, false);
 
         // Return available folders
         return sources.keySet().stream().filter(x -> new File(x).exists()).toArray(String[]::new);
@@ -126,6 +122,15 @@ public class BackupRunnable implements Runnable {
                         "_backups', shutting down plugin!");
                 plugin.getServer().getPluginManager().disablePlugin(plugin);
             }
+
+    }
+
+    private void log(String msg) {
+
+        if (broadcast)
+            Bukkit.broadcastMessage(msg);
+        else
+            Bukkit.getLogger().info(msg);
 
     }
 

@@ -74,7 +74,7 @@ public class BackupCommands implements CommandExecutor {
         if (intervalTaskId != -1) Bukkit.getScheduler().cancelTask(intervalTaskId);
 
         // If interval is being disabled
-        long interval = (plugin.getConfig().getInt("RunBackupOn.intervalMinutes") * 60 * 20);
+        long interval = (plugin.getConfig().getInt("RunBackupOn.repeatIntervals.minutes") * 60 * 20);
         if (interval < 1) intervalTaskId = -1;
 
         // Interval is provided

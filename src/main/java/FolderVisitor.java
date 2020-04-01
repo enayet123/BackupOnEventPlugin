@@ -78,7 +78,8 @@ public class FolderVisitor implements FileVisitor<Path> {
         if (exceeded)
             Bukkit.getLogger().info(prefix + ChatColor.RED + "Max of " + max + " MB exceeded! Deleting files...");
         else
-            Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Currently using: " + current/1000000 + " MB");
+            Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Currently using: " + current/1000000 + " MB " +
+                    "out of " + max + " MB");
     }
 
     @Override

@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -637,7 +636,7 @@ public class Updater {
         Version local = new Version(getVersion(localVersion));
         Version remote = new Version(getVersion(remoteVersion));
 
-        return (local.compareTo(remote) == -1);
+        return (local.compareTo(remote) < 0);
     }
 
     /**

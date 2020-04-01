@@ -38,6 +38,7 @@ public class BackupEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
+        // Check for plugin update
         getScheduler().runTaskAsynchronously(plugin, new UpdateRunnable(plugin, e.getPlayer(), this));
 
         // Hide Join message if required
@@ -75,7 +76,7 @@ public class BackupEvents implements Listener {
      * Returns if an update is queued
      * @return is update queued
      */
-    boolean getUpdateQueued() { return updateQueued; }
+    boolean isUpdateQueued() { return updateQueued; }
 
     /**
      * Sets updateQueued to true, this can only be set to false through a reload/restart

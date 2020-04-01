@@ -39,7 +39,7 @@ public class UpdateRunnable implements Runnable {
         if (!plugin.getConfig().getBoolean("AutoUpdate.enabled") || !player.isOp()) return;
 
         // Is there an update already queued, message and return
-        if (backupEvents.getUpdateQueued()) { player.sendMessage(msg); return; }
+        if (backupEvents.isUpdateQueued()) { player.sendMessage(msg); return; }
 
         // Else check for update
         Updater updater = new Updater(plugin, 336739, plugin.getPluginFile(), Updater.UpdateType.DEFAULT, true);
