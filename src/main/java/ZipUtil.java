@@ -1,5 +1,8 @@
 import java.io.*;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
@@ -114,9 +117,11 @@ class ZipUtil {
                 zipEntry.setLastAccessTime(attr.lastAccessTime());
                 zipEntry.setTime(attr.lastModifiedTime().toMillis());
 
+                FileChannel fileChannel = FileChannel.open(file.toPath(),
+                        StandardOpenOption.READ,StandardOpenOption.WRITE);
+
                 out.putNextEntry(zipEntry);
-                try (BufferedInputStream in = new BufferedInputStream(new
-                        FileInputStream(file))) {
+                try (BufferedInputStream in = new BufferedInputStream(Channels.newInputStream(fileChannel))) {
                     byte[] b = new byte[1024];
                     int count;
                     while ((count = in.read(b)) > 0) {

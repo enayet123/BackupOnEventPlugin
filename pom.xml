@@ -6,7 +6,7 @@
 
     <groupId>com.enayet.minecraft.backuponevent</groupId>
     <artifactId>backuponevent</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6.1-SNAPSHOT</version>
 
     <build>
         <plugins>

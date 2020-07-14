@@ -17,7 +17,6 @@ public class BackupRunnable implements Runnable {
     private BackupOnEvent plugin;
     private String prefix;
     private String triggerName;
-    private String worldName;
     private boolean broadcast;
 
     /**
@@ -25,15 +24,13 @@ public class BackupRunnable implements Runnable {
      * run a successful backup
      * @param plugin Plugin to get prefix of a message/announcement and disk allocation
      * @param triggerName Name of the entity that triggered event
-     * @param worldName Name of the world (From server.properties)
      * @param broadcast States if an announcement is to be made
      *                  on completion
      */
-    private BackupRunnable(BackupOnEvent plugin, String triggerName, String worldName, boolean broadcast) {
+    private BackupRunnable(BackupOnEvent plugin, String triggerName, boolean broadcast) {
         this.prefix = plugin.prefix;
         this.plugin = plugin;
         this.triggerName = triggerName;
-        this.worldName = worldName;
         this.broadcast = broadcast;
     }
 
@@ -48,7 +45,7 @@ public class BackupRunnable implements Runnable {
 
         // Setup Date and define format
         Date date = new Date();
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + triggerName + "-" + worldName + "'");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + triggerName + "-backups'");
 
         // Define filename
         String file = ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
@@ -57,7 +54,7 @@ public class BackupRunnable implements Runnable {
         // Attempt to Zip available world folders
         try {
             ZipUtil.ZipDirs(
-                worldName + "_backups", // Destination
+                "backups", // Destination
                     file,
                 true, f -> true, // Delete existing?
                 getAvailableDirs() // Source folders
@@ -68,7 +65,7 @@ public class BackupRunnable implements Runnable {
 
             // Verify storage constraints are met
             if (plugin.getConfig().getInt("BackupStorage.maxInMegaBytes") != 0)
-                new FolderVisitor(prefix,worldName + "_backups").meetStorageRestriction(
+                new FolderVisitor(prefix,"backups").meetStorageRestriction(
                         plugin.getConfig().getInt("BackupStorage.maxInMegaBytes")
                 );
 
@@ -93,7 +90,7 @@ public class BackupRunnable implements Runnable {
 
         // Run asynchronous backup
         boolean announce = plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new BackupRunnable(plugin, name, world, announce));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, new BackupRunnable(plugin, name, announce));
 
     }
 
@@ -113,13 +110,12 @@ public class BackupRunnable implements Runnable {
     private void createFolder() {
 
         // Create backup folder
-        File f = new File(worldName + "_backups");
+        File f = new File("backups");
         if (!f.exists())
             if (f.mkdir()) {
-                Bukkit.getLogger().info(prefix + "Created directory '" + worldName + "_backups'");
+                Bukkit.getLogger().info(prefix + "Created directory 'backups'");
             } else {
-                Bukkit.getLogger().info(prefix + "Failed to create directory '" + worldName +
-                        "_backups', shutting down plugin!");
+                Bukkit.getLogger().info(prefix + "Failed to create directory 'backups', shutting down plugin!");
                 plugin.getServer().getPluginManager().disablePlugin(plugin);
             }
 
