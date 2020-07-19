@@ -1,8 +1,8 @@
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -11,30 +11,15 @@ import java.util.Set;
  */
 public class BackupOnEvent extends JavaPlugin {
 
-    static final String BACKUP_WORLDS = "BackupWorlds";
-    private String pluginName;
-    String prefix;
-
     /**
-     * Defines a message prefix, prepares necessary
-     * files/folders, commands and registers events
-     * from Backup Events when plugin has
-     * successfully initialized
+     * Prepares necessary files/folders, commands
+     * and registers events from Backup Events when
+     * plugin has successfully initialized
      */
     @Override
     public void onEnable() {
-        this.pluginName = getDescription().getName();
-        // Announcement prefix
-        prefix = String.format("%s[%s%s%s]%s ",
-                ChatColor.WHITE,
-                ChatColor.BLUE,
-                this.getDescription().getName(),
-                ChatColor.WHITE,
-                ChatColor.RESET
-        );
-
         // State plugin is active
-        Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Activated");
+        Bukkit.getLogger().info(Constants.STATUS_ACTIVATED);
 
         // Setup commands
         this.setupCommands();
@@ -57,7 +42,7 @@ public class BackupOnEvent extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-        Bukkit.getLogger().info(prefix + ChatColor.RED + "Deactivated");
+        Bukkit.getLogger().info(Constants.STATUS_DEACTIVATED);
     }
 
     /**
@@ -70,32 +55,23 @@ public class BackupOnEvent extends JavaPlugin {
 
         this.createFolder();
         getConfig().options().copyDefaults(true);
-        getConfig().options().header(
-                "BackupWorlds lets you toggle which worlds to include in backups\n" +
-                "You can enable/disable the events that will trigger a backup to happen from RunBackupOn\n" +
-                "repeatInterval runs a backup every time X minutes has passed, 0 means disabled\n" +
-                "Messages and announcements can be hidden\n" +
-                "onJoin and onQuit will hide the 'x has joined the server' messages\n" +
-                "opsOnly restricts the /backup command to ops only\n" +
-                "Setting maxInMegaBytes to 0 will provide unlimited disk space\n" +
-                "Setting minimumIntervalInMinutes to 0 will allow concurrent backups\n" +
-                "AutoUpdate will download the latest version from bukkit.org when an Op joins the server");
-        getConfig().addDefault("BackupWorlds.world", true);
-        getConfig().addDefault("BackupWorlds.world_nether", true);
-        getConfig().addDefault("BackupWorlds.world_the_end", true);
-        getConfig().addDefault("BackupWorlds.custom_named_world", false);
-        getConfig().addDefault("RunBackupOn.playerJoin", true);
-        getConfig().addDefault("RunBackupOn.playerQuit", false);
-        getConfig().addDefault("RunBackupOn.lastPlayerQuit", false);
-        getConfig().addDefault("RunBackupOn.repeatIntervals.minutes", 0);
-        getConfig().addDefault("RunBackupOn.repeatIntervals.whenPlayersAreOnline", true);
-        getConfig().addDefault("HideMessage.onJoin", false);
-        getConfig().addDefault("HideMessage.onQuit", false);
-        getConfig().addDefault("HideMessage.backupAnnouncement", false);
-        getConfig().addDefault("BackupCommand.opsOnly", true);
-        getConfig().addDefault("BackupStorage.maxInMegaBytes", 1024);
-        getConfig().addDefault("BackupStorage.minimumIntervalInMinutes", 1);
-        getConfig().addDefault("AutoUpdate.enabled", true);
+        getConfig().options().header(Constants.CONFIG_HEADER);
+        getConfig().addDefault(Constants.BACKUPWORLDS_WORLD, true);
+        getConfig().addDefault(Constants.BACKUPWORLDS_NETHER, true);
+        getConfig().addDefault(Constants.BACKUPWORLDS_END, true);
+        getConfig().addDefault(Constants.BACKUPWORLDS_CUSTOM, false);
+        getConfig().addDefault(Constants.BACKUPEVENT_JOIN, true);
+        getConfig().addDefault(Constants.BACKUPEVENT_QUIT, false);
+        getConfig().addDefault(Constants.BACKUPEVENT_LAST_TO_QUIT, false);
+        getConfig().addDefault(Constants.BACKUPEVENT_REPEAT_MINUTES, 0);
+        getConfig().addDefault(Constants.BACKUPEVENT_REPEAT_WHEN_ONLINE, true);
+        getConfig().addDefault(Constants.HIDE_MSG_JOIN, false);
+        getConfig().addDefault(Constants.HIDE_MSG_QUIT, false);
+        getConfig().addDefault(Constants.HIDE_MSG_ANNOUNCE, false);
+        getConfig().addDefault(Constants.BACKUPCMD_OPS_ONLY, true);
+        getConfig().addDefault(Constants.BACKUPSTORAGE_MAX_MB, 1024);
+        getConfig().addDefault(Constants.BACKUPSTORAGE_MIN_INTERVAL_MINUTES, 1);
+        getConfig().addDefault(Constants.AUTO_UPDATE_ENABLED, true);
         saveConfig();
 
     }
@@ -103,33 +79,32 @@ public class BackupOnEvent extends JavaPlugin {
     private void createFolder() {
         // Create folder for data
         if (!getDataFolder().exists()) {
-            Bukkit.getLogger().info(prefix + ChatColor.RED + pluginName + " folder does not exist");
-            if (getDataFolder().mkdir())
-                Bukkit.getLogger().info(prefix + ChatColor.GREEN + pluginName + " folder has been created");
-            else
-                Bukkit.getLogger().info(prefix + ChatColor.RED + "Failed to create " + pluginName + " folder");
+            Bukkit.getLogger().info(Constants.LOG_FOLDER_NOT_EXIST);
+            Bukkit.getLogger().info((getDataFolder().mkdir() ?
+                    Constants.LOG_FOLDER_CREATED : Constants.LOG_FOLDER_CREAT_FAILED));
         }
     }
 
     private void setupCommands() {
-        getCommand("backup").setExecutor(new BackupCommands(this));
+        Objects.requireNonNull(getCommand(Constants.CMD_BACKUP)).setExecutor(new BackupCommands(this));
     }
 
     private boolean pluginIsObsolete() {
 
         // Make sure plugin isn't redundant
         try {
-            Set<String> worlds = getConfig().getConfigurationSection(BACKUP_WORLDS).getKeys(false);
+            Set<String> worlds = Objects.requireNonNull(getConfig()
+                    .getConfigurationSection(Constants.BACKUPWORLDS)).getKeys(false);
             if (!worlds.isEmpty())
                 for (String world : worlds)
-                    if (getConfig().get(String.format("%s.%s", BACKUP_WORLDS, world)).equals(true))
+                    if (Objects.equals(getConfig().get(String.format("%s.%s", Constants.BACKUPWORLDS, world)), true))
                         return false;
         } catch (Exception e) {
-            Bukkit.getLogger().info(prefix + ChatColor.RED + "Fetching keys returned null!");
+            Bukkit.getLogger().severe(Constants.LOG_KEY_RETURNED_NULL);
         }
 
-        Bukkit.getLogger().info(prefix + ChatColor.RED + "Plugin is obsolete as all backups are disabled!");
-        Bukkit.getLogger().info(prefix + ChatColor.RED + "Shutting down plugin...");
+        Bukkit.getLogger().info(Constants.LOG_OBSELETE);
+        Bukkit.getLogger().info(Constants.LOG_SHUTTING_DOWN);
         return true;
 
     }

@@ -1,8 +1,7 @@
+import org.bukkit.Bukkit;
+
 import java.io.*;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
@@ -27,7 +26,7 @@ class ZipUtil {
      * @param filePredicate:  if this predicate returns true the file is included in the zip
      *                        otherwise it's not included.
      * @param sourceDirs:     multiple source directories to be zipped.
-     * @throws IOException
+     * @throws IOException    thrown when file manipulation fails
      */
     static void ZipDirs(
             String destinationDir,
@@ -43,16 +42,14 @@ class ZipUtil {
 
         if (!destinationDirFile.exists()) {
             if (!destinationDirFile.mkdirs()) {
-                throw new RuntimeException("cannot create directories ");
+                throw new RuntimeException(Constants.LOG_CANNOT_CREATE_DIRECTORIES);
             }
         } else {
             boolean exists = zipFile.exists();
             if (exists && deleteExisting && !zipFile.delete()) {
-                throw new RuntimeException("cannot delete existing zip file: " +
-                        zipFile.getAbsolutePath());
+                throw new RuntimeException(String.format(Constants.LOG_CANNOT_DELETE_EXISTING, zipFile.getAbsolutePath()));
             } else if (exists && !deleteExisting) {
-                System.out.println("Zip file already exists: " +
-                        zipFile.getAbsolutePath());
+                System.out.println(String.format(Constants.LOG_ZIP_FILE_EXISTS, zipFile.getAbsolutePath()));
                 return;
             }
         }
@@ -60,12 +57,11 @@ class ZipUtil {
         createZip(zipFile, filePredicate, sourceDirs);
     }
 
-    private static void createZip (File destination, Predicate<File> filePredicate,
-                                   String... sourceDirs) throws IOException {
+    private static void createZip (File destination, Predicate<File> filePredicate, String... sourceDirs)
+            throws IOException {
 
-        if (sourceDirs == null) {
-            throw new RuntimeException("Source dirs are null");
-        }
+        if (sourceDirs == null)
+            throw new RuntimeException(Constants.LOG_SOURCE_DIRS_NULL);
 
 
         try (ZipOutputStream out = new ZipOutputStream(
@@ -74,12 +70,11 @@ class ZipUtil {
 
             for (String sourceDir : sourceDirs) {
                 File sourceDirFile = new File(sourceDir);
-                if (!sourceDirFile.exists()) {
-                    throw new RuntimeException("Source dir doesn't exists "
-                            + sourceDirFile);
-                }
+                if (!sourceDirFile.exists())
+                    throw new RuntimeException(String.format(Constants.LOG_SOURCE_DOESNT_EXIST, sourceDirFile));
 
-                addDirRecursively(sourceDirFile.getName(),
+                addDirRecursively(
+                        sourceDirFile.getName(),
                         sourceDirFile.getAbsolutePath(),
                         sourceDirFile,
                         out, filePredicate);
@@ -96,7 +91,6 @@ class ZipUtil {
                                            File dirFile,
                                            final ZipOutputStream out,
                                            Predicate<File> filePredicate) throws IOException {
-
 
         File[] files = dirFile.listFiles();
         if (files != null) {
@@ -117,17 +111,18 @@ class ZipUtil {
                 zipEntry.setLastAccessTime(attr.lastAccessTime());
                 zipEntry.setTime(attr.lastModifiedTime().toMillis());
 
-                FileChannel fileChannel = FileChannel.open(file.toPath(),
-                        StandardOpenOption.READ,StandardOpenOption.WRITE);
-
                 out.putNextEntry(zipEntry);
-                try (BufferedInputStream in = new BufferedInputStream(Channels.newInputStream(fileChannel))) {
+                try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
                     byte[] b = new byte[1024];
                     int count;
-                    while ((count = in.read(b)) > 0) {
-                        out.write(b, 0, count);
+                    try {
+                        while ((count = in.read(b)) > 0)
+                            out.write(b, 0, count);
+                        out.closeEntry();
+                    } catch (java.io.IOException e) {
+                        if (!file.getName().equals(Constants.SESSION_LOCK))
+                            Bukkit.getLogger().warning(String.format(Constants.LOG_FAILED_SAVING_FILE, file.getName()));
                     }
-                    out.closeEntry();
                 }
             }
         }

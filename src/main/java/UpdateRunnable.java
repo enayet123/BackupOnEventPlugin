@@ -1,5 +1,4 @@
 import net.gravitydevelopment.updater.Updater;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 /**
@@ -11,7 +10,6 @@ public class UpdateRunnable implements Runnable {
     private BackupOnEvent plugin;
     private Player player;
     private BackupEvents backupEvents;
-    private final String msg;
 
     /**
      * Initializes the runnable with the information required to
@@ -25,7 +23,6 @@ public class UpdateRunnable implements Runnable {
         this.plugin = plugin;
         this.player = player;
         this.backupEvents = backupEvents;
-        this.msg = plugin.prefix + ChatColor.GREEN + "Update available! Type " + ChatColor.YELLOW + "/reload confirm";
     }
 
     /**
@@ -36,17 +33,17 @@ public class UpdateRunnable implements Runnable {
     public void run() {
 
         // If not allowed by config or player is not Op, return
-        if (!plugin.getConfig().getBoolean("AutoUpdate.enabled") || !player.isOp()) return;
+        if (!plugin.getConfig().getBoolean(Constants.AUTO_UPDATE_ENABLED) || !player.isOp()) return;
 
         // Is there an update already queued, message and return
-        if (backupEvents.isUpdateQueued()) { player.sendMessage(msg); return; }
+        if (backupEvents.isUpdateQueued()) { player.sendMessage(Constants.MSG_UPDATE_AVAILABLE); return; }
 
         // Else check for update
         Updater updater = new Updater(plugin, 336739, plugin.getPluginFile(), Updater.UpdateType.DEFAULT, true);
 
         // Get, message and update result
         if (updater.getResult() == Updater.UpdateResult.SUCCESS) {
-            player.sendMessage(msg);
+            player.sendMessage(Constants.MSG_UPDATE_AVAILABLE);
             backupEvents.setUpdateQueued();
         }
 

@@ -1,4 +1,3 @@
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -6,6 +5,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.time.Instant;
+import java.util.Objects;
 
 import static org.bukkit.Bukkit.*;
 
@@ -17,8 +17,6 @@ import static org.bukkit.Bukkit.*;
 public class BackupEvents implements Listener {
 
     private BackupOnEvent plugin;
-    private String prefix;
-    private String worldName = getWorlds().get(0).getName();
     private Instant lastBackup = Instant.EPOCH;
     private boolean updateQueued = false;
 
@@ -26,10 +24,7 @@ public class BackupEvents implements Listener {
      * Initializes event listener class
      * @param plugin Refers back to the main class, BackupOnEvent
      */
-    BackupEvents(BackupOnEvent plugin) {
-        this.plugin = plugin;
-        this.prefix = plugin.prefix;
-    }
+    BackupEvents(BackupOnEvent plugin) { this.plugin = plugin; }
 
     /**
      * This event triggers when a player joins a server
@@ -42,10 +37,10 @@ public class BackupEvents implements Listener {
         getScheduler().runTaskAsynchronously(plugin, new UpdateRunnable(plugin, e.getPlayer(), this));
 
         // Hide Join message if required
-        if (plugin.getConfig().get("HideMessage.onJoin").equals(true)) e.setJoinMessage("");
+        if (Objects.equals(plugin.getConfig().get(Constants.HIDE_MSG_JOIN), true)) e.setJoinMessage("");
 
         // If event is disabled, return immediately
-        if (plugin.getConfig().get("RunBackupOn.playerJoin").equals(false)) return;
+        if (Objects.equals(plugin.getConfig().get(Constants.BACKUPEVENT_JOIN), false)) return;
 
         // Run backup
         this.backup(e.getPlayer());
@@ -60,14 +55,14 @@ public class BackupEvents implements Listener {
     public void onQuit(PlayerQuitEvent e) {
 
         // Hide Quit message if required
-        if (plugin.getConfig().get("HideMessage.onQuit").equals(true)) e.setQuitMessage("");
+        if (Objects.equals(plugin.getConfig().get(Constants.HIDE_MSG_QUIT), true)) e.setQuitMessage("");
 
         // Check if player was last player to leave and this event type is enabled
-        if (getOnlinePlayers().size() == 1 && plugin.getConfig().get("RunBackupOn.lastPlayerQuit").equals(true))
+        if (getOnlinePlayers().size() == 1 && Objects.equals(plugin.getConfig().get(Constants.BACKUPEVENT_LAST_TO_QUIT), true))
             this.backup(e.getPlayer());
 
-        // Else if quit backups are enabled, run backup
-        else if (plugin.getConfig().get("RunBackupOn.playerQuit").equals(true))
+        // Else if player quit backups are enabled, run backup
+        else if (Objects.equals(plugin.getConfig().get(Constants.BACKUPEVENT_QUIT), true))
             this.backup(e.getPlayer());
 
     }
@@ -89,11 +84,11 @@ public class BackupEvents implements Listener {
         if (!minimumIntervalPassed()) return;
 
         // Notify all players on server if required
-        if (plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false))
-            broadcastMessage(prefix + ChatColor.YELLOW + "Attempting to backup...");
+        if (Objects.equals(plugin.getConfig().get(Constants.HIDE_MSG_ANNOUNCE), false))
+            broadcastMessage(Constants.LOG_BACKUP_ATTEMPT);
 
         // Backup
-        BackupRunnable.run(plugin, p.getDisplayName(), worldName);
+        BackupRunnable.run(plugin, p.getDisplayName());
         lastBackup = Instant.now();
 
     }
@@ -102,7 +97,7 @@ public class BackupEvents implements Listener {
 
         // If no minimum set, return true
         int min;
-        if ((min = (plugin.getConfig().getInt("BackupStorage.minimumIntervalInMinutes") * 60)) == 0) return true;
+        if ((min = (plugin.getConfig().getInt(Constants.BACKUPSTORAGE_MIN_INTERVAL_MINUTES) * 60)) == 0) return true;
 
         // Check if minimum interval has passed
         return ((Instant.now().getEpochSecond() - min) > lastBackup.getEpochSecond());

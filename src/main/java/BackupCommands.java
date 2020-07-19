@@ -1,10 +1,11 @@
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Objects;
 
 /**
  * Command executor class used to listen for
@@ -32,11 +33,12 @@ public class BackupCommands implements CommandExecutor {
      * @param args Additional arguments provided
      * @return Reverts to usage if false or apply expected changes
      */
+    @SuppressWarnings("NullableProblems")
     @Override
     public boolean onCommand(CommandSender commandSender, Command cmd, String label, String[] args) {
 
         // If backup command, execute
-        if (cmd.getName().equalsIgnoreCase("backup"))
+        if (cmd.getName().equalsIgnoreCase(Constants.CMD_BACKUP))
             onCommandBackup(commandSender);
 
         return true;
@@ -51,19 +53,17 @@ public class BackupCommands implements CommandExecutor {
             Player p = (Player) commandSender;
 
             // Check if op status required
-            if (plugin.getConfig().get("BackupCommand.opsOnly").equals(true))
-                if (!commandSender.isOp()) {
-                    p.sendMessage(ChatColor.RED + "I'm sorry, but you do not have permission to perform this command."
-                            + " Please contact the server administrators if you believe that this is in error.");
-                    return;
-                }
+            if (Objects.equals(plugin.getConfig().get(Constants.BACKUPCMD_OPS_ONLY), true) && !commandSender.isOp()) {
+                p.sendMessage(Constants.MSG_REQUIRE_OP);
+                return;
+            }
 
             // Backup with player as reason for trigger
-            BackupRunnable.run(plugin, p.getName(), Bukkit.getWorlds().get(0).getName());
+            BackupRunnable.run(plugin, p.getName());
 
         } else if (commandSender instanceof ConsoleCommandSender) {
             // Backup with server console as reason for trigger
-            BackupRunnable.run(plugin, "CONSOLE", Bukkit.getWorlds().get(0).getName());
+            BackupRunnable.run(plugin, Constants.CMD_CONSOLE);
         }
 
     }
@@ -74,14 +74,13 @@ public class BackupCommands implements CommandExecutor {
         if (intervalTaskId != -1) Bukkit.getScheduler().cancelTask(intervalTaskId);
 
         // If interval is being disabled
-        long interval = (plugin.getConfig().getInt("RunBackupOn.repeatIntervals.minutes") * 60 * 20);
+        long interval = (plugin.getConfig().getInt(Constants.BACKUPSTORAGE_MIN_INTERVAL_MINUTES) * 60 * 20);
         if (interval < 1) intervalTaskId = -1;
 
         // Interval is provided
         else
-            intervalTaskId = Bukkit.getScheduler().runTaskTimer(
-                    plugin, new BackupInterval(plugin), interval, interval
-            ).getTaskId();
+            intervalTaskId = Bukkit.getScheduler()
+                    .runTaskTimer(plugin, new BackupInterval(plugin), interval, interval).getTaskId();
 
     }
 

@@ -1,5 +1,4 @@
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.*;
 public class BackupRunnable implements Runnable {
 
     private BackupOnEvent plugin;
-    private String prefix;
     private String triggerName;
     private boolean broadcast;
 
@@ -28,7 +26,6 @@ public class BackupRunnable implements Runnable {
      *                  on completion
      */
     private BackupRunnable(BackupOnEvent plugin, String triggerName, boolean broadcast) {
-        this.prefix = plugin.prefix;
         this.plugin = plugin;
         this.triggerName = triggerName;
         this.broadcast = broadcast;
@@ -45,34 +42,32 @@ public class BackupRunnable implements Runnable {
 
         // Setup Date and define format
         Date date = new Date();
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH'h'mm'm'-'" + triggerName + "-backups'");
+        DateFormat format = new SimpleDateFormat(String.format(Constants.DATE_FORMAT, triggerName));
 
         // Define filename
         String file = ((format.format(date).length() <= 255) ? // Zip file name (Ensuring length is < Windows MAX_PATH)
-                format.format(date):format.format(date).substring(0, 254)) + ".zip";
+                format.format(date):format.format(date).substring(0, 254)) + Constants.EXT;
 
         // Attempt to Zip available world folders
         try {
             ZipUtil.ZipDirs(
-                "backups", // Destination
-                    file,
+                Constants.TARGET_DIR, // Destination
+                file,
                 true, f -> true, // Delete existing?
                 getAvailableDirs() // Source folders
             );
 
             // Announce or log backup success message
-            this.log(prefix + ChatColor.GREEN + "Created backup " + file);
+            this.log(String.format(Constants.LOG_CREATED_BACKUP, file));
 
             // Verify storage constraints are met
-            if (plugin.getConfig().getInt("BackupStorage.maxInMegaBytes") != 0)
-                new FolderVisitor(prefix,"backups").meetStorageRestriction(
-                        plugin.getConfig().getInt("BackupStorage.maxInMegaBytes")
-                );
+            if (plugin.getConfig().getInt(Constants.BACKUPSTORAGE_MAX_MB) != 0)
+                new FolderVisitor().meetStorageRestriction(plugin.getConfig().getInt(Constants.BACKUPSTORAGE_MAX_MB));
 
         } catch (IOException e) {
 
             // Announce or log backup failure message
-            this.log(prefix + ChatColor.RED + "Failed to backup world! Please check server logs!");
+            this.log(Constants.LOG_FAILED_BACKUP);
 
             e.printStackTrace();
 
@@ -84,12 +79,11 @@ public class BackupRunnable implements Runnable {
      * Run asynchronous backup
      * @param plugin Plugin to get prefix of a message/announcement and disk allocation
      * @param name Name of the entity that triggered event
-     * @param world Name of the world (From server.properties)
      */
-    static void run(BackupOnEvent plugin, String name, String world) {
+    static void run(BackupOnEvent plugin, String name) {
 
         // Run asynchronous backup
-        boolean announce = plugin.getConfig().get("HideMessage.backupAnnouncement").equals(false);
+        boolean announce = Objects.equals(plugin.getConfig().get(Constants.HIDE_MSG_ANNOUNCE), false);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, new BackupRunnable(plugin, name, announce));
 
     }
@@ -97,8 +91,9 @@ public class BackupRunnable implements Runnable {
     private String[] getAvailableDirs() {
 
         // Map of possible folders
-        Map<String, Boolean> sources = new HashMap<String, Boolean>();
-        Set<String> worlds = plugin.getConfig().getConfigurationSection(BackupOnEvent.BACKUP_WORLDS).getKeys(false);
+        Map<String, Boolean> sources = new HashMap<>();
+        Set<String> worlds = Objects.requireNonNull(plugin.getConfig()
+                .getConfigurationSection(Constants.BACKUPWORLDS)).getKeys(false);
         for (String world: worlds)
             sources.put(world, false);
 
@@ -110,12 +105,12 @@ public class BackupRunnable implements Runnable {
     private void createFolder() {
 
         // Create backup folder
-        File f = new File("backups");
+        File f = new File(Constants.TARGET_DIR);
         if (!f.exists())
             if (f.mkdir()) {
-                Bukkit.getLogger().info(prefix + "Created directory 'backups'");
+                Bukkit.getLogger().info(Constants.LOG_CREATED_TARGET_DIR);
             } else {
-                Bukkit.getLogger().info(prefix + "Failed to create directory 'backups', shutting down plugin!");
+                Bukkit.getLogger().info(Constants.LOG_FAILED_TARGET_DIR);
                 plugin.getServer().getPluginManager().disablePlugin(plugin);
             }
 

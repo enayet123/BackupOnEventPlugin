@@ -1,5 +1,4 @@
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,18 +14,12 @@ import java.util.Collections;
 public class FolderVisitor implements FileVisitor<Path> {
 
     private long bytes = 0;
-    private String prefix;
-    private String path;
     private ArrayList<Path> files;
 
     /**
      * Default constructor defines the folder of interest
-     * @param prefix Used by announcements/logs
-     * @param path Folder of interest
      */
-    FolderVisitor(String prefix, String path) {
-        this.prefix = prefix;
-        this.path = path;
+    FolderVisitor() {
         this.files = new ArrayList<>();
     }
 
@@ -51,7 +44,7 @@ public class FolderVisitor implements FileVisitor<Path> {
             // Attempt to remove file
             File fileToRemove = files.get(0).toFile(); // Get earliest backup
             bytes -= fileToRemove.length(); // Remove file size
-            Bukkit.getLogger().info(prefix + ChatColor.YELLOW + "Removing " + fileToRemove.toString());
+            Bukkit.getLogger().info(String.format(Constants.LOG_REMOVING_FILE, fileToRemove.toString()));
 
             // If delete file successful
             if (fileToRemove.delete())
@@ -67,19 +60,18 @@ public class FolderVisitor implements FileVisitor<Path> {
 
     private void walkPathTree() {
         try {
-            Files.walkFileTree(Paths.get(this.path), this);
+            Files.walkFileTree(Paths.get(Constants.TARGET_DIR), this);
         } catch (IOException e) {
             e.printStackTrace();
-            Bukkit.getLogger().info(prefix + ChatColor.RED + "Unable to measure folder size");
+            Bukkit.getLogger().info(Constants.LOG_FAILED_MEASURING_FOLDER);
         }
     }
 
     private void logStatus(boolean exceeded, long max, long current) {
         if (exceeded)
-            Bukkit.getLogger().info(prefix + ChatColor.RED + "Max of " + max + " MB exceeded! Deleting files...");
+            Bukkit.getLogger().info(String.format(Constants.LOG_EXCEEDED_MAX, max));
         else
-            Bukkit.getLogger().info(prefix + ChatColor.GREEN + "Currently using: " + current/1000000 + " MB " +
-                    "out of " + max + " MB");
+            Bukkit.getLogger().info(String.format(Constants.LOG_CURRENTLY_USING, current/1000000, max));
     }
 
     @Override
@@ -101,7 +93,7 @@ public class FolderVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-        if (dir.toString().equals("world_backups")) Collections.sort(files); // Sort array of files
+        if (dir.toString().equals(Constants.TARGET_DIR)) Collections.sort(files); // Sort array of files
         return FileVisitResult.CONTINUE;
     }
 

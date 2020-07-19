@@ -1,5 +1,4 @@
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 /**
  * Creates backups every time its called by a TaskTimer
@@ -22,16 +21,16 @@ public class BackupInterval implements Runnable {
     public void run() {
 
         // If interval requires a player to be online
-        if (plugin.getConfig().getBoolean("RunBackupOn.repeatIntervals.whenPlayersAreOnline"))
+        if (plugin.getConfig().getBoolean(Constants.BACKUPEVENT_REPEAT_WHEN_ONLINE))
             // If no one is online, return early
             if (Bukkit.getOnlinePlayers().size() == 0) {
                 if (!lastWasSkipped)
-                    Bukkit.getLogger().info(plugin.prefix + ChatColor.YELLOW + "No players are online, skipping backup");
+                    Bukkit.getLogger().info(Constants.LOG_NO_PLAYERS_ONLINE);
                 lastWasSkipped = true;
                 return;
             }
 
-        BackupRunnable.run(plugin, "INTERVAL", Bukkit.getWorlds().get(0).getName());
+        BackupRunnable.run(plugin, Constants.RUNNABLE_INTERVAL);
         lastWasSkipped = false;
 
     }
