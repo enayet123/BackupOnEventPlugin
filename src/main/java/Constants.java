@@ -87,6 +87,7 @@ class Constants {
     static final String LOG_ZIP_FILE_EXISTS = PREFIX + "Zip file already exists: %s";
     static final String LOG_SOURCE_DIRS_NULL = PREFIX + "Source directories are null";
     static final String LOG_SOURCE_DOESNT_EXIST = PREFIX + "Source directory doesn't exists: %s";
+    static final String LOG_INTERVAL_BACKUP_TIME = PREFIX + "Interval backups running every %d minutes";
 
     // Player messages
     static final String MSG_REQUIRE_OP = PREFIX + ChatColor.RED + "I'm sorry, but you do not have permission to " +

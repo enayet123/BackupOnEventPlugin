@@ -70,11 +70,14 @@ public class BackupCommands implements CommandExecutor {
 
     private void setupInterval() {
 
+        int repeatInterval = plugin.getConfig().getInt(Constants.BACKUPEVENT_REPEAT_MINUTES);
+        Bukkit.getLogger().info(String.format(Constants.LOG_INTERVAL_BACKUP_TIME, repeatInterval));
+        long interval = (repeatInterval * 60 * 20);
+
         // Kill current interval task if running
         if (intervalTaskId != -1) Bukkit.getScheduler().cancelTask(intervalTaskId);
 
         // If interval is being disabled
-        long interval = (plugin.getConfig().getInt(Constants.BACKUPSTORAGE_MIN_INTERVAL_MINUTES) * 60 * 20);
         if (interval < 1) intervalTaskId = -1;
 
         // Interval is provided
