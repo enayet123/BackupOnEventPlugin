@@ -60,7 +60,8 @@ public class BackupOnEvent extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         getConfig().options().header(Constants.CONFIG_HEADER);
         for (World world : worlds)
-            getConfig().addDefault(String.format("%s.%s", Constants.BACKUPWORLDS, world.getName()), false);
+            getConfig().addDefault(String.format("%s.%s", Constants.BACKUPWORLDS, world.getName()), true);
+        getConfig().addDefault(Constants.BACKUPWORLDS_PLUGINS, false);
         getConfig().addDefault(Constants.BACKUPWORLDS_CUSTOM, false);
         getConfig().addDefault(Constants.BACKUPEVENT_JOIN, true);
         getConfig().addDefault(Constants.BACKUPEVENT_QUIT, false);

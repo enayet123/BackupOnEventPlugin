@@ -24,6 +24,7 @@ class Constants {
 
     static final String BACKUPWORLDS = "BackupWorlds";
     static final String BACKUPWORLDS_CUSTOM = BACKUPWORLDS + ".custom_named_world";
+    static final String BACKUPWORLDS_PLUGINS = BACKUPWORLDS + ".plugins";
 
     private static final String BACKUPEVENT = "RunBackupOn";
     private static final String REPEAT = ".repeatIntervals";

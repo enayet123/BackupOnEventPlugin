@@ -23,7 +23,7 @@ The plugin now supports automatic backups. This can be disabled by setting `enab
 
 ## Default config.yml
 ```yaml
-# BackupWorlds lets you toggle which worlds to include in backups
+# BackupWorlds lets you toggle which worlds (folders) to include in backups
 # You can enable/disable the events that will trigger a backup to happen from RunBackupOn
 # repeatInterval runs a backup every time X minutes has passed, 0 means disabled
 # Messages and announcements can be hidden
@@ -36,6 +36,7 @@ BackupWorlds:
   world: true
   world_nether: true
   world_the_end: true
+  plugins: false
   custom_named_world: false
 RunBackupOn:
   playerJoin: true
