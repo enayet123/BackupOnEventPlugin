@@ -23,9 +23,6 @@ class Constants {
             "AutoUpdate will download the latest version from bukkit.org when an Op joins the server";
 
     static final String BACKUPWORLDS = "BackupWorlds";
-    static final String BACKUPWORLDS_WORLD = BACKUPWORLDS + ".world";
-    static final String BACKUPWORLDS_NETHER = BACKUPWORLDS + ".world_nether";
-    static final String BACKUPWORLDS_END = BACKUPWORLDS + ".world_the_end";
     static final String BACKUPWORLDS_CUSTOM = BACKUPWORLDS + ".custom_named_world";
 
     private static final String BACKUPEVENT = "RunBackupOn";

@@ -1,7 +1,9 @@
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,13 +54,13 @@ public class BackupOnEvent extends JavaPlugin {
     File getPluginFile() { return this.getFile(); }
 
     private void setupConfigFile() {
+        List<World> worlds = Bukkit.getWorlds();
 
         this.createFolder();
         getConfig().options().copyDefaults(true);
         getConfig().options().header(Constants.CONFIG_HEADER);
-        getConfig().addDefault(Constants.BACKUPWORLDS_WORLD, true);
-        getConfig().addDefault(Constants.BACKUPWORLDS_NETHER, true);
-        getConfig().addDefault(Constants.BACKUPWORLDS_END, true);
+        for (World world : worlds)
+            getConfig().addDefault(String.format("%s.%s", Constants.BACKUPWORLDS, world.getName()), false);
         getConfig().addDefault(Constants.BACKUPWORLDS_CUSTOM, false);
         getConfig().addDefault(Constants.BACKUPEVENT_JOIN, true);
         getConfig().addDefault(Constants.BACKUPEVENT_QUIT, false);
