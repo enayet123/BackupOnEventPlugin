@@ -8,6 +8,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Inspects a folder by measuring the total storage
@@ -95,7 +96,12 @@ public class FolderVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-        if (dir.toString().equals(Constants.TARGET_DIR)) Collections.sort(files); // Sort array of files
+        if (dir.toString().equals(Constants.TARGET_DIR)) Collections.sort(files, new Comparator<Path>() {
+            @Override
+            public int compare(Path path1, Path path2) {
+                return path1.toString().compareTo(path2.toString());
+            }
+        }); // Sort array of files
         return FileVisitResult.CONTINUE;
     }
 
