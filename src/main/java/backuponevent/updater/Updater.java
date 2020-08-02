@@ -1,4 +1,4 @@
-package net.gravitydevelopment.updater;
+package backuponevent.updater;
 
 import java.io.*;
 import java.net.HttpURLConnection;

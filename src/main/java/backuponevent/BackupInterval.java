@@ -1,3 +1,5 @@
+package backuponevent;
+
 import org.bukkit.Bukkit;
 
 /**

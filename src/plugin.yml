@@ -1,7 +1,7 @@
-name: BackupOnEvent
+name: backuponevent.BackupOnEvent
 version: 1.6.4
 author: Enayet Hussain (enayet123)
-main: BackupOnEvent
+main: backuponevent.BackupOnEvent
 description: Backs up all worlds based on events
 commands:
   backup:

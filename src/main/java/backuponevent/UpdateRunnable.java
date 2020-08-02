@@ -1,4 +1,6 @@
-import net.gravitydevelopment.updater.Updater;
+package backuponevent;
+
+import backuponevent.updater.Updater;
 import org.bukkit.entity.Player;
 
 /**
