@@ -86,7 +86,7 @@ public class BackupOnEvent extends JavaPlugin {
         if (!getDataFolder().exists()) {
             Bukkit.getLogger().info(Constants.LOG_FOLDER_NOT_EXIST);
             Bukkit.getLogger().info((getDataFolder().mkdir() ?
-                    Constants.LOG_FOLDER_CREATED : Constants.LOG_FOLDER_CREAT_FAILED));
+                    Constants.LOG_FOLDER_CREATED : Constants.LOG_FOLDER_CREATE_FAILED));
         }
     }
 
@@ -108,7 +108,7 @@ public class BackupOnEvent extends JavaPlugin {
             Bukkit.getLogger().severe(Constants.LOG_KEY_RETURNED_NULL);
         }
 
-        Bukkit.getLogger().info(Constants.LOG_OBSELETE);
+        Bukkit.getLogger().info(Constants.LOG_OBSOLETE);
         Bukkit.getLogger().info(Constants.LOG_SHUTTING_DOWN);
         return true;
 

@@ -1,6 +1,7 @@
 package backuponevent;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class BackupRunnable implements Runnable {
             ZipUtil.ZipDirs(
                 Constants.TARGET_DIR, // Destination
                 file,
-                true, f -> true, // Delete existing?
+                false, f -> true, // Delete existing?
                 getAvailableDirs() // Source folders
             );
 
@@ -93,14 +94,17 @@ public class BackupRunnable implements Runnable {
     private String[] getAvailableDirs() {
 
         // Map of possible folders
-        Map<String, Boolean> sources = new HashMap<>();
-        Set<String> worlds = Objects.requireNonNull(plugin.getConfig()
-                .getConfigurationSection(Constants.BACKUPWORLDS)).getKeys(false);
+        Map<String, Boolean> availableDir = new HashMap<>();
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection(Constants.BACKUPWORLDS);
+        Set<String> worlds = Objects.requireNonNull(config).getKeys(false);
+
+        // Only add folders set to true
         for (String world: worlds)
-            sources.put(world, false);
+            if (config.getBoolean(world))
+                availableDir.put(world, false);
 
         // Return available folders
-        return sources.keySet().stream().filter(x -> new File(x).exists()).toArray(String[]::new);
+        return availableDir.keySet().stream().filter(x -> new File(x).exists()).toArray(String[]::new);
 
     }
 

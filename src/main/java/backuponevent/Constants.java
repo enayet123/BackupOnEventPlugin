@@ -66,9 +66,9 @@ class Constants {
     private static final String WARNING = ChatColor.YELLOW + "WARNING" + ChatColor.RESET + ": ";
     static final String LOG_FOLDER_NOT_EXIST = PREFIX + ChatColor.RED + PLUGIN_NAME + " folder does not exist";
     static final String LOG_FOLDER_CREATED = PREFIX + ChatColor.GREEN + PLUGIN_NAME + " folder has been created";
-    static final String LOG_FOLDER_CREAT_FAILED = PREFIX + ChatColor.RED + "Failed to create " + PLUGIN_NAME + " folder";
+    static final String LOG_FOLDER_CREATE_FAILED = PREFIX + ChatColor.RED + "Failed to create " + PLUGIN_NAME + " folder";
     static final String LOG_KEY_RETURNED_NULL = PREFIX + ChatColor.RED + "Fetching keys returned null!";
-    static final String LOG_OBSELETE = PREFIX + ChatColor.RED + "Plugin is obsolete as all backups are disabled!";
+    static final String LOG_OBSOLETE = PREFIX + ChatColor.RED + "Plugin is obsolete as all backups are disabled!";
     static final String LOG_SHUTTING_DOWN = PREFIX + ChatColor.RED + "Shutting down plugin...";
     static final String LOG_NO_PLAYERS_ONLINE = PREFIX + ChatColor.YELLOW + "No players are online, skipping backup";
     static final String LOG_CREATED_BACKUP = PREFIX + ChatColor.GREEN + "Created backup %s";
